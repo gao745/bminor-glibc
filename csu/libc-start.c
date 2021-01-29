@@ -200,10 +200,11 @@ LIBC_START_MAIN (int (*main) (int, char **, char ** MAIN_AUXVEC_DECL),
   /* Do static pie self relocation after tunables and cpu features
      are setup for ifunc resolvers. Before this point relocations
      must be avoided.  */
-  _dl_relocate_static_pie ();
+  int irel_applied = _dl_relocate_static_pie ();
 
   /* Perform IREL{,A} relocations.  */
-  ARCH_SETUP_IREL ();
+  if (!irel_applied)
+    ARCH_SETUP_IREL ();
 
   /* The stack guard goes into the TCB, so initialize it early.  */
   ARCH_SETUP_TLS ();
@@ -211,7 +212,8 @@ LIBC_START_MAIN (int (*main) (int, char **, char ** MAIN_AUXVEC_DECL),
   /* In some architectures, IREL{,A} relocations happen after TLS setup in
      order to let IFUNC resolvers benefit from TCB information, e.g. powerpc's
      hwcap and platform fields available in the TCB.  */
-  ARCH_APPLY_IREL ();
+  if (!irel_applied)
+    ARCH_APPLY_IREL ();
 
   /* Set up the stack checker's canary.  */
   uintptr_t stack_chk_guard = _dl_setup_stack_chk_guard (_dl_random);

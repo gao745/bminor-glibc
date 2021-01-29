@@ -25,7 +25,7 @@
 
 /* Relocate static executable with PIE.  */
 
-void
+int
 _dl_relocate_static_pie (void)
 {
   struct link_map *main_map = _dl_get_dl_main_map ();
@@ -66,5 +66,7 @@ _dl_relocate_static_pie (void)
        with the run-time address of the r_debug structure  */
     main_map->l_info[DT_DEBUG]->d_un.d_ptr = (ElfW(Addr)) r;
 # endif
+
+  return 1;
 }
 #endif
